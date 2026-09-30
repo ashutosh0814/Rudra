@@ -107,12 +107,15 @@ function initScrollReveal() {
 // ============================================
 
 function init3DTilt() {
-    const tiltElements = document.querySelectorAll('[data-tilt]');
-    
-    tiltElements.forEach(element => {
-        element.addEventListener('mousemove', handleTilt);
-        element.addEventListener('mouseleave', resetTilt);
-    });
+    // Only enable on non-touch devices
+    if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+        const tiltElements = document.querySelectorAll('[data-tilt]');
+        
+        tiltElements.forEach(element => {
+            element.addEventListener('mousemove', handleTilt);
+            element.addEventListener('mouseleave', resetTilt);
+        });
+    }
 }
 
 function handleTilt(e) {
@@ -141,12 +144,15 @@ function resetTilt(e) {
 // ============================================
 
 function initMagneticButtons() {
-    const magneticButtons = document.querySelectorAll('.magnetic-btn');
-    
-    magneticButtons.forEach(button => {
-        button.addEventListener('mousemove', handleMagneticMove);
-        button.addEventListener('mouseleave', handleMagneticLeave);
-    });
+    // Only enable on non-touch devices
+    if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+        const magneticButtons = document.querySelectorAll('.magnetic-btn');
+        
+        magneticButtons.forEach(button => {
+            button.addEventListener('mousemove', handleMagneticMove);
+            button.addEventListener('mouseleave', handleMagneticLeave);
+        });
+    }
 }
 
 function handleMagneticMove(e) {
@@ -231,37 +237,65 @@ function initMobileMenu() {
 // ============================================
 
 function initParallax() {
-    const parallaxElements = document.querySelectorAll('.gradient-orb');
-    
-    window.addEventListener('scroll', () => {
-        const scrolled = window.pageYOffset;
+    // Only enable on larger screens
+    if (window.innerWidth > 768) {
+        const parallaxElements = document.querySelectorAll('.gradient-orb');
         
-        parallaxElements.forEach((element, index) => {
-            const speed = 0.3 + (index * 0.1);
-            const yPos = -(scrolled * speed);
-            element.style.transform = `translateY(${yPos}px)`;
+        let ticking = false;
+        
+        window.addEventListener('scroll', () => {
+            if (!ticking) {
+                window.requestAnimationFrame(() => {
+                    const scrolled = window.pageYOffset;
+                    
+                    parallaxElements.forEach((element, index) => {
+                        const speed = 0.3 + (index * 0.1);
+                        const yPos = -(scrolled * speed);
+                        element.style.transform = `translateY(${yPos}px)`;
+                    });
+                    
+                    ticking = false;
+                });
+                
+                ticking = true;
+            }
         });
-    });
+    }
 }
 
 // ============================================
 // MOUSE GLOW EFFECT ON CARDS
 // ============================================
 
-const cards = document.querySelectorAll('.card-3d');
+// Only enable on non-touch devices
+if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    const cards = document.querySelectorAll('.card-3d');
 
-cards.forEach(card => {
-    card.addEventListener('mousemove', (e) => {
-        const rect = card.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        
-        const glow = card.querySelector('.card-glow');
-        if (glow) {
-            glow.style.background = `radial-gradient(circle at ${x}px ${y}px, rgba(79, 70, 229, 0.4), transparent 50%)`;
-        }
+    cards.forEach(card => {
+        card.addEventListener('mousemove', (e) => {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            const glow = card.querySelector('.card-glow');
+            if (glow) {
+                glow.style.background = `radial-gradient(circle at ${x}px ${y}px, rgba(79, 70, 229, 0.4), transparent 50%)`;
+            }
+        });
     });
-});
+}
+
+// ============================================
+// VIEWPORT HEIGHT FIX FOR MOBILE
+// ============================================
+
+function setVH() {
+    const vh = window.innerHeight * 0.01;
+    document.documentElement.style.setProperty('--vh', `${vh}px`);
+}
+
+setVH();
+window.addEventListener('resize', debounce(setVH, 100));
 
 // ============================================
 // PERFORMANCE OPTIMIZATION
